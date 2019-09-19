@@ -1,30 +1,31 @@
-defmodule Connection do
-  def init do
-    spawn fn -> 
-      {:ok, conn} = Mint.HTTP.connect(:http, "httpbin.org", 80)
-      loop_conn(conn)
-    end
+defmodule Southside.Conn do
+  defstruct [:mint_conn, :responses]
+
+  @doc """
+  Helper to keep mint connection up-to-date
+  """
+  def update_mint_conn(southside_conn, new_mint_conn) do
+    Map.put(southside_conn, :mint_conn, new_mint_conn)
   end
 
-  def req(pid) do
-    send pid, :send
+  @doc """
+  Adds status code to the referenced response
+  """
+  def handle_frame(southside_conn, {:status, response_reference, status_code}) when is_integer(status_code) do
+    # todo: add the status code to the responses key of the southside connection
   end
 
-  def loop_conn(conn) do
-    receive do
-      :send ->
-        {:ok, conn, request_ref} = Mint.HTTP.request(conn, "GET", "/", [], "")
-        loop_conn(conn)
+  @doc """
+  Adds headers to the referenced response
+  """
+  def handle_frame(southside_conn, {:headers, response_reference, headers}) when is_list(headers) do
+    # todo: add the headers to the responses key
+  end
 
-
-      message ->
-        case Mint.HTTP.stream(conn, message) do
-         {:ok, conn_stream, responses} -> 
-           loop_conn(conn_stream)
-
-         other -> 
-          loop_conn(conn)
-        end
-    end
+  @doc """
+  Adds response body to the referenced response
+  """
+  def handle_frame(southside_conn, {:data, response_reference, status_code}) do
+    # todo: add data to the response using
   end
 end
